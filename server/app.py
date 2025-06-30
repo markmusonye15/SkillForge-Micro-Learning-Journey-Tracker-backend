@@ -3,6 +3,7 @@ from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate  
 from datetime import timedelta
+from flask_cors import CORS
 
 # Importing the configuration and database instances
 from .config import config
@@ -46,9 +47,11 @@ def create_app(config_name=None):
         return jsonify({"message": "Welcome to the SkillForge API!"})
     return app
 
-
 app = create_app()
 
+CORS(app, origins=["https://skill-forge-self.vercel.app"])
 if __name__ == '__main__':
     app.run(debug=True)
+
+
 
