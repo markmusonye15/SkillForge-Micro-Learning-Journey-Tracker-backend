@@ -1,0 +1,54 @@
+import os
+from flask import Flask, jsonify
+from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate  
+from datetime import timedelta
+
+# Importing the configuration and database instances
+from .config import config
+from .models import db, bcrypt
+
+# Importing the controller Blueprints
+from .controllers.auth_controller import auth_bp
+from .controllers.journey_controller import journey_bp
+from .controllers.step_controller import step_bp
+
+def create_app(config_name=None):
+    """
+    Application Factory Pattern:
+    Creates and configures the Flask application.
+    """
+    if config_name is None:
+        config_name = os.getenv('FLASK_CONFIG', 'development')
+
+    app = Flask(__name__)
+    
+    # Load configuration from the specified class
+    app.config.from_object(config[config_name])
+    config[config_name].init_app(app)
+
+    # Initialize extensions with the app
+    db.init_app(app)
+    bcrypt.init_app(app)
+    jwt = JWTManager(app)
+    
+    # Initialize Flask-Migrate
+    migrate = Migrate(app, db)
+
+    # Register all the controller blueprints with their URL prefixes
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(journey_bp, url_prefix='/api/journeys')
+    app.register_blueprint(step_bp, url_prefix='/api/steps')
+
+    # A simple root route to confirm the API is running
+    @app.route('/')
+    def home():
+        return jsonify({"message": "Welcome to the SkillForge API!"})
+    return app
+
+
+app = create_app()
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
