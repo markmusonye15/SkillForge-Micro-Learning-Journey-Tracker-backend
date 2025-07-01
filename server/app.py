@@ -1,13 +1,13 @@
 import os
 from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
-from flask_migrate import Migrate  
+from flask_migrate import Migrate 
 from datetime import timedelta
 from flask_cors import CORS
 
 # Importing the configuration and database instances
 from .config import config
-from .models import db, bcrypt
+from .models import db, bcrypt, TokenBlocklist 
 
 # Importing the controller Blueprints
 from .controllers.auth_controller import auth_bp
@@ -32,11 +32,16 @@ def create_app(config_name=None):
     db.init_app(app)
     bcrypt.init_app(app)
     jwt = JWTManager(app)
-    
-    # Initialize Flask-Migrate
     migrate = Migrate(app, db)
+    CORS(app, origins=["https://skill-forge-self.vercel.app"])
 
-    # Register all the controller blueprints with their URL prefixes
+    @jwt.token_in_blocklist_loader
+    def check_if_token_in_blocklist(jwt_header, jwt_payload: dict):
+        jti = jwt_payload["jti"]
+        token = db.session.query(TokenBlocklist.id).filter_by(jti=jti).scalar()
+        return token is not None
+
+        # Register all the controller blueprints with their URL prefixes
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(journey_bp, url_prefix='/api/journeys')
     app.register_blueprint(step_bp, url_prefix='/api/steps')
@@ -45,13 +50,14 @@ def create_app(config_name=None):
     @app.route('/')
     def home():
         return jsonify({"message": "Welcome to the SkillForge API!"})
+        
     return app
 
 app = create_app()
 
-CORS(app, origins=["https://skill-forge-self.vercel.app"])
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 

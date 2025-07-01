@@ -30,8 +30,6 @@ class User(db.Model):
     def __repr__(self):
         return f'<User {self.username}>'
 
-
-# --- THIS MODEL IS NOW CORRECTLY DEFINED IN THIS FILE ---
 class TokenBlocklist(db.Model):
     __tablename__ = 'token_blocklist'
     id = db.Column(db.Integer, primary_key=True)
