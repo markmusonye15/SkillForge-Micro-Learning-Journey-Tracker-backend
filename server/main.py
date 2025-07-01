@@ -1,6 +1,8 @@
 import typer
-from .app import app  
+from .app import create_app
 from .models import db, User, Journey, Step
+
+app = create_app()
 
 cli = typer.Typer(help="SkillForge CLI: A tool for managing the application's data.")
 
@@ -29,4 +31,3 @@ def create_user(
 
 if __name__ == "__main__":
     cli()
-

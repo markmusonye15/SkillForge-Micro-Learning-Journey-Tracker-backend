@@ -9,7 +9,6 @@ auth_bp = Blueprint('auth_bp', __name__)
 def register_user():
     """Handles new user registration with username and email."""
     data = request.get_json()
-    # --- UPDATED VALIDATION ---
     if not data or not data.get('username') or not data.get('password') or not data.get('email'):
         return jsonify({"msg": "Username, email, and password are required"}), 400
 
@@ -19,7 +18,6 @@ def register_user():
     if User.query.filter_by(email=data['email']).first():
         return jsonify({"msg": "Email already in use"}), 409
     
-    # --- UPDATED USER CREATION ---
     user = User(
         username=data['username'],
         email=data['email'],
@@ -32,9 +30,8 @@ def register_user():
 
 @auth_bp.route('/login', methods=['POST'])
 def login_user():
-    # Login can be done with username or email
     data = request.get_json()
-    login_identifier = data.get('login') # User can send 'login' with username or email
+    login_identifier = data.get('login')
     password = data.get('password')
 
     if not login_identifier or not password:
@@ -60,3 +57,4 @@ def logout_user():
     db.session.add(TokenBlocklist(jti=jti, created_at=now))
     db.session.commit()
     return jsonify({"msg": "Successfully logged out"}), 200
+
