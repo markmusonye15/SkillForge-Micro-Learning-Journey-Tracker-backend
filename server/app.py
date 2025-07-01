@@ -19,8 +19,13 @@ def create_app(config_name=None):
     Application Factory Pattern:
     Creates and configures the Flask application.
     """
-    if config_name is None:
+    # --- THIS IS THE FIX ---
+    # If the RENDER environment variable is present, we know we are in production.
+    if os.getenv('RENDER'):
+        config_name = 'production'
+    elif config_name is None:
         config_name = os.getenv('FLASK_CONFIG', 'development')
+    # -----------------------
 
     app = Flask(__name__)
     
@@ -33,7 +38,7 @@ def create_app(config_name=None):
     bcrypt.init_app(app)
     jwt = JWTManager(app)
     migrate = Migrate(app, db)
-    CORS(app, origins=["http://localhost:3000", "https://skill-forge-self.vercel.app"])
+    CORS(app, origins=["https://skill-forge-self.vercel.app"])
 
     @jwt.token_in_blocklist_loader
     def check_if_token_in_blocklist(jwt_header, jwt_payload: dict):
@@ -57,4 +62,5 @@ app = create_app()
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
