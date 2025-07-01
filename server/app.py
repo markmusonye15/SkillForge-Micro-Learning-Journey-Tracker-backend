@@ -41,7 +41,8 @@ def create_app(config_name=None):
         token = db.session.query(TokenBlocklist.id).filter_by(jti=jti).scalar()
         return token is not None
 
-        # Register all the controller blueprints with their URL prefixes
+    # --- FIX: De-indented the following lines ---
+    # Register all the controller blueprints with their URL prefixes
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(journey_bp, url_prefix='/api/journeys')
     app.register_blueprint(step_bp, url_prefix='/api/steps')
